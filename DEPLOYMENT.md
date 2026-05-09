@@ -1,27 +1,26 @@
-# Deploy Without Render
+# Deploy For Free
 
-## Recommended: Koyeb
+## Recommended: Hugging Face Spaces
 
-Koyeb can deploy this API from GitHub using the existing `Dockerfile`.
+Hugging Face Spaces supports Docker apps and provides free CPU hardware. This repo is already configured for Docker Spaces with `app_port: 7860` in `README.md`.
 
-1. Open [Koyeb](https://app.koyeb.com/).
-2. Create a new app or service.
-3. Choose GitHub as the deployment source.
-4. Select `Gtmrjk/db-quote-agent-api`.
-5. Choose Dockerfile deployment.
-6. Set the service type to web service.
-7. Add this environment variable:
+1. Open [Hugging Face Spaces](https://huggingface.co/new-space).
+2. Create a new Space.
+3. Choose **Docker** as the SDK.
+4. Keep it public if you want the free option.
+5. Upload/push this repo's files to the Space repository.
+6. Add this secret in Space Settings:
 
 ```text
 API_KEY=your-long-secret-token
 ```
 
-8. Deploy.
+The app listens on port `7860`, which is the Hugging Face Spaces default for Docker apps.
 
 After deploy, test:
 
 ```bash
-curl -X POST https://YOUR-KOYEB-DOMAIN/generate \
+curl -X POST https://YOUR-SPACE-SUBDOMAIN.hf.space/generate \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -34,9 +33,9 @@ curl -X POST https://YOUR-KOYEB-DOMAIN/generate \
   }'
 ```
 
-## Backup Option: Railway
+## Backup Option: Google Cloud Run
 
-Railway can also deploy this Dockerfile from GitHub. Configure `/health` as the healthcheck path and add the same `API_KEY` environment variable.
+Google Cloud Run has an always-free allowance, but it requires a Google Cloud billing account. The same Dockerfile works there because it also respects the `PORT` environment variable.
 
 ## Not Recommended
 
