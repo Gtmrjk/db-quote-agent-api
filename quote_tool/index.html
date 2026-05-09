@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quote Image Generator</title>
+    <style>
+      body { margin: 0; min-height: 100vh; background: #edf1f4; color: #171b20; font-family: Inter, Arial, sans-serif; }
+      .app-shell { display: grid; gap: 20px; grid-template-columns: 380px 1fr; padding: 24px; }
+      .panel { background: #fff; border: 1px solid #d8dee5; border-radius: 8px; padding: 18px; }
+      .field { display: grid; gap: 8px; margin-bottom: 14px; }
+      label { color: #303842; font-size: 13px; font-weight: 700; }
+      input, select, textarea, button { font: inherit; }
+      input, select, textarea { border: 1px solid #d8dee5; border-radius: 6px; padding: 10px 12px; }
+      textarea { min-height: 120px; }
+      .hidden-control { display: none; }
+      .two-col { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+      .preview-panel { display: grid; gap: 14px; justify-items: center; }
+      canvas { background: #fff; box-shadow: 0 12px 28px rgba(28, 38, 48, 0.2); max-width: 100%; }
+    </style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <form class="panel controls" id="quoteForm">
+        <div class="field">
+          <label for="imageInput">Image</label>
+          <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" />
+        </div>
+        <div class="field hidden-control">
+          <label for="formatSelect">Format</label>
+          <select id="formatSelect">
+            <option value="0">730 x 340</option>
+            <option value="1">730 x 458</option>
+            <option value="2">730 x 548</option>
+            <option value="3">730 x 881</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="brandSelect">Domain</label>
+          <select id="brandSelect">
+            <option value="bhaskar">Bhaskar</option>
+            <option value="divyabhaskar">Divya Bhaskar</option>
+            <option value="divyamarathi">Divya Marathi</option>
+            <option value="englishbhaskar">English Bhaskar</option>
+          </select>
+        </div>
+        <div class="field hidden-control">
+          <label for="zoomRange">Zoom</label>
+          <input id="zoomRange" type="range" min="0.5" max="3" step="0.01" value="1" />
+        </div>
+        <div class="field hidden-control">
+          <label for="offsetXRange">Move X</label>
+          <input id="offsetXRange" type="range" min="-300" max="300" step="1" value="0" />
+        </div>
+        <div class="field hidden-control">
+          <label for="offsetYRange">Move Y</label>
+          <input id="offsetYRange" type="range" min="-300" max="300" step="1" value="0" />
+        </div>
+        <div class="field">
+          <label for="quoteInput">Quote</label>
+          <textarea id="quoteInput" rows="6" maxlength="226" required>काम ऐसा करो कि पहचान बन जाए, हर कदम ऐसा रखो कि निशान बन जाए।</textarea>
+        </div>
+        <div class="two-col">
+          <div class="field">
+            <label for="authorInput">Author</label>
+            <input id="authorInput" type="text" value="Author Name" required />
+          </div>
+          <div class="field">
+            <label for="designationInput">Designation</label>
+            <input id="designationInput" type="text" value="Designation" />
+          </div>
+        </div>
+      </form>
+      <section class="panel preview-panel" aria-label="Generated image preview">
+        <canvas id="quoteCanvas" width="730" height="340"></canvas>
+        <button id="downloadBtn" type="button">Download JPG</button>
+      </section>
+    </main>
+    <script>
+      const formats = [
+        { width: 730, height: 340, imageWidth: 310, imageHeight: 340, limit: 92 },
+        { width: 730, height: 458, imageWidth: 310, imageHeight: 458, limit: 155 },
+        { width: 730, height: 548, imageWidth: 310, imageHeight: 548, limit: 206 },
+        { width: 730, height: 881, imageWidth: 730, imageHeight: 458, limit: 226 },
+      ];
+      const brands = {
+        bhaskar: { short: "B", color: "#f37021" },
+        divyabhaskar: { short: "DB", color: "#ee6a23" },
+        divyamarathi: { short: "DM", color: "#d62828" },
+        englishbhaskar: { short: "EB", color: "#234e9b" },
+      };
+      const el = {
+        canvas: document.getElementById("quoteCanvas"),
+        imageInput: document.getElementById("imageInput"),
+        brandSelect: document.getElementById("brandSelect"),
+        quoteInput: document.getElementById("quoteInput"),
+        authorInput: document.getElementById("authorInput"),
+        designationInput: document.getElementById("designationInput"),
+        downloadBtn: document.getElementById("downloadBtn"),
+      };
+      const state = { image: null };
+
+      function getFormat() {
+        const length = el.quoteInput.value.trim().length;
+        return formats.find((format) => length <= format.limit) || formats[formats.length - 1];
+      }
+      function makeSampleImage() {
+        const canvas = document.createElement("canvas");
+        canvas.width = 900;
+        canvas.height = 900;
+        const ctx = canvas.getContext("2d");
+        const sky = ctx.createLinearGradient(0, 0, 0, 900);
+        sky.addColorStop(0, "#b8d7f0");
+        sky.addColorStop(0.52, "#f7d3a1");
+        sky.addColorStop(1, "#183d37");
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, 900, 900);
+        ctx.fillStyle = "rgba(255,255,255,0.78)";
+        ctx.beginPath();
+        ctx.arc(690, 160, 84, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#23404d";
+        ctx.beginPath();
+        ctx.moveTo(0, 560);
+        ctx.lineTo(210, 300);
+        ctx.lineTo(420, 560);
+        ctx.fill();
+        ctx.fillStyle = "#314f45";
+        ctx.beginPath();
+        ctx.moveTo(180, 585);
+        ctx.lineTo(535, 210);
+        ctx.lineTo(900, 590);
+        ctx.fill();
+        const image = new Image();
+        image.onload = render;
+        image.src = canvas.toDataURL("image/jpeg", 0.95);
+        state.image = image;
+      }
+      function drawCoverImage(ctx, img, x, y, width, height) {
+        const imageRatio = img.naturalWidth / img.naturalHeight;
+        const targetRatio = width / height;
+        let sw = img.naturalWidth;
+        let sh = img.naturalHeight;
+        if (imageRatio > targetRatio) sw = sh * targetRatio;
+        else sh = sw / targetRatio;
+        ctx.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, x, y, width, height);
+      }
+      function wrapText(ctx, text, maxWidth) {
+        const words = text.replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+        const lines = [];
+        let line = "";
+        for (const word of words) {
+          const test = line ? `${line} ${word}` : word;
+          if (ctx.measureText(test).width > maxWidth && line) {
+            lines.push(line);
+            line = word;
+          } else {
+            line = test;
+          }
+        }
+        if (line) lines.push(line);
+        return lines.length ? lines : [""];
+      }
+      function drawBrand(ctx, brandKey) {
+        const brand = brands[brandKey] || brands.bhaskar;
+        ctx.save();
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.roundRect(16, 16, 60, 60, 12);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(0,0,0,0.14)";
+        ctx.stroke();
+        ctx.fillStyle = brand.color;
+        ctx.font = `800 ${brand.short.length > 1 ? 21 : 30}px Arial, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(brand.short, 46, 47);
+        ctx.restore();
+      }
+      function render() {
+        const format = getFormat();
+        const isTall = format.height === 881;
+        const ctx = el.canvas.getContext("2d");
+        el.canvas.width = format.width;
+        el.canvas.height = format.height;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, format.width, format.height);
+        if (state.image && state.image.complete) drawCoverImage(ctx, state.image, 0, 0, format.imageWidth, format.imageHeight);
+        drawBrand(ctx, el.brandSelect.value);
+        if (!isTall) {
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(format.imageWidth, 0, format.width - format.imageWidth, format.height);
+        }
+        const brand = brands[el.brandSelect.value] || brands.bhaskar;
+        ctx.fillStyle = brand.color;
+        ctx.fillRect(isTall ? 330 : 274, isTall ? 420 : 0, isTall ? 70 : 64, isTall ? 70 : 64);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = `900 ${isTall ? 58 : 52}px Georgia, serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("“", isTall ? 365 : 306, isTall ? 460 : 37);
+
+        const fontFamily = "'Anek Devanagari', 'Noto Sans Devanagari', Arial, sans-serif";
+        const textX = isTall ? format.width / 2 : format.imageWidth + 60;
+        const textTop = isTall ? format.imageHeight + 68 : 40;
+        const textMaxWidth = isTall ? format.width - 72 : format.width - format.imageWidth - 102;
+        const textMaxY = format.height - (isTall ? 68 : 20);
+        const align = isTall ? "center" : "left";
+        const lineHeight = 40;
+        ctx.fillStyle = "#111111";
+        ctx.textBaseline = "top";
+        ctx.textAlign = align;
+        ctx.font = `400 30px ${fontFamily}`;
+        const quoteLines = wrapText(ctx, el.quoteInput.value, textMaxWidth);
+        const designationLines = el.designationInput.value.trim() ? wrapText(ctx, el.designationInput.value, textMaxWidth) : [];
+        const blockHeight = quoteLines.length * lineHeight + 20 + 30 + (designationLines.length ? 10 + designationLines.length * 38 : 0);
+        let y = textTop + Math.max(0, (textMaxY - textTop - blockHeight) / 2);
+        for (const line of quoteLines) {
+          if (y > textMaxY) break;
+          ctx.fillText(line, textX, y);
+          y += lineHeight;
+        }
+        y += 20;
+        ctx.font = `700 30px ${fontFamily}`;
+        ctx.fillText(el.authorInput.value.trim() || "Author Name", textX, y);
+        y += 40;
+        ctx.font = `400 30px ${fontFamily}`;
+        for (const line of designationLines) {
+          if (y > textMaxY) break;
+          ctx.fillText(line, textX, y);
+          y += 38;
+        }
+      }
+      el.imageInput.addEventListener("change", () => {
+        const file = el.imageInput.files && el.imageInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const image = new Image();
+          image.onload = render;
+          image.src = reader.result;
+          state.image = image;
+        };
+        reader.readAsDataURL(file);
+      });
+      document.querySelectorAll("input, select, textarea").forEach((input) => {
+        input.addEventListener("input", render);
+        input.addEventListener("change", render);
+      });
+      el.downloadBtn.addEventListener("click", () => {
+        const link = document.createElement("a");
+        link.download = "quote-image.jpg";
+        link.href = el.canvas.toDataURL("image/jpeg", 0.95);
+        link.click();
+      });
+      if (!CanvasRenderingContext2D.prototype.roundRect) {
+        CanvasRenderingContext2D.prototype.roundRect = function roundRect(x, y, width, height, radius) {
+          const r = Math.min(radius, width / 2, height / 2);
+          this.beginPath();
+          this.moveTo(x + r, y);
+          this.arcTo(x + width, y, x + width, y + height, r);
+          this.arcTo(x + width, y + height, x, y + height, r);
+          this.arcTo(x, y + height, x, y, r);
+          this.arcTo(x, y, x + width, y, r);
+          this.closePath();
+          return this;
+        };
+      }
+      makeSampleImage();
+      setTimeout(render, 0);
+    </script>
+  </body>
+</html>
