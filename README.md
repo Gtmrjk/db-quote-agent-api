@@ -1,10 +1,6 @@
 # DB Quote Image Agent API
 
-This service wraps the browser-only DB/OneCMS quote image generator at:
-
-https://www.bhaskar.com/onecms/quote-image-generator
-
-The page is behind OneCMS login, so the API uses Playwright to sign in, drive the generator UI, and return the generated image.
+This service wraps a bundled browser-only DB-style quote image generator. The API uses Playwright to open the local canvas tool, fill the quote fields, and return the generated image.
 
 ## API
 
@@ -15,29 +11,21 @@ curl -X POST https://YOUR-RENDER-URL/generate \
   -d '{
     "quote": "The problem is the path.",
     "author": "DB",
+    "designation": "Editor",
+    "brand": "bhaskar",
+    "image_format": "jpeg",
     "output": "base64"
   }'
 ```
 
-For raw image bytes, set `"output": "png"`.
+For raw image bytes, set `"output": "png"`. Use `"image_format": "jpeg"` or `"image_format": "png"` to choose the generated image format.
 
 ## Environment Variables
 
 | Name | Required | Purpose |
 | --- | --- | --- |
 | `API_KEY` | Recommended | Bearer token for your API. |
-| `ONECMS_QUOTE_URL` | Yes | Defaults to the Bhaskar quote generator URL. |
-| `ONECMS_USERNAME` | Yes, unless storage state is supplied | OneCMS username. |
-| `ONECMS_PASSWORD` | Yes, unless storage state is supplied | OneCMS password. |
-| `ONECMS_STORAGE_STATE_JSON` | Optional | Playwright storage state JSON for accounts that need OTP/session reuse. |
-
-If the OneCMS account requires OTP, log in once locally, export Playwright storage state, and paste that JSON into `ONECMS_STORAGE_STATE_JSON` on Render.
-
-```bash
-source .venv/bin/activate
-playwright install chromium
-python scripts/export_storage_state.py
-```
+| `QUOTE_TOOL_FILE` | Optional | Path to the bundled generator HTML. Defaults to `quote_tool/index.html`. |
 
 ## Local Run
 
@@ -62,10 +50,7 @@ http://127.0.0.1:8000/docs
 3. Render will read `render.yaml` and build the Docker service.
 4. Add the secret environment variables in Render:
    - `API_KEY`
-   - `ONECMS_USERNAME`
-   - `ONECMS_PASSWORD`
-   - optionally `ONECMS_STORAGE_STATE_JSON`
 
 ## Notes
 
-The generator UI is not public, so the selectors are intentionally flexible. After a successful authenticated inspection, tighten the selectors in `app/agent.py` if the post-login page has stable field names.
+The API currently supports the bundled local generator fields: quote, author, designation, brand, optional uploaded base64 image, and JPEG/PNG output.
