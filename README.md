@@ -5,7 +5,7 @@ This service wraps a bundled browser-only DB-style quote image generator. The AP
 ## API
 
 ```bash
-curl -X POST https://YOUR-RENDER-URL/generate \
+curl -X POST https://YOUR-APP-DOMAIN/generate \
   -H "Authorization: Bearer $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -43,13 +43,11 @@ Open:
 http://127.0.0.1:8000/docs
 ```
 
-## Deploy To Render
+## Deploy
 
-1. Push this repository to GitHub.
-2. In Render, create a new Blueprint from the GitHub repository.
-3. Render will read `render.yaml` and build the Docker service.
-4. Add the secret environment variables in Render:
-   - `API_KEY`
+The recommended no-Render path is Koyeb because it can deploy this repo directly from the `Dockerfile`.
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the Koyeb steps.
 
 ## Notes
 
