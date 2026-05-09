@@ -1,3 +1,12 @@
+---
+title: DB Quote Agent API
+emoji: 🖼️
+colorFrom: orange
+colorTo: blue
+sdk: docker
+app_port: 7860
+---
+
 # DB Quote Image Agent API
 
 This service wraps a bundled browser-only DB-style quote image generator. The API uses Playwright to open the local canvas tool, fill the quote fields, and return the generated image.
@@ -40,14 +49,14 @@ uvicorn app.main:app --reload
 Open:
 
 ```text
-http://127.0.0.1:8000/docs
+http://127.0.0.1:7860/docs
 ```
 
 ## Deploy
 
-The recommended no-Render path is Koyeb because it can deploy this repo directly from the `Dockerfile`.
+The recommended free no-Render path is Hugging Face Spaces because it can deploy this repo as a Docker Space.
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the Koyeb steps.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the Hugging Face Spaces steps.
 
 ## Notes
 
