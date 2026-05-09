@@ -36,6 +36,16 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/")
+async def root() -> dict[str, str]:
+    return {
+        "name": "DB Quote Image Agent API",
+        "health": "/health",
+        "docs": "/docs",
+        "generate": "/generate",
+    }
+
+
 @app.post(
     "/generate",
     response_model=QuoteResponse,
