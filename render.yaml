@@ -6,13 +6,5 @@ services:
     autoDeploy: true
     healthCheckPath: /health
     envVars:
-      - key: ONECMS_QUOTE_URL
-        value: https://www.bhaskar.com/onecms/quote-image-generator
       - key: API_KEY
-        sync: false
-      - key: ONECMS_USERNAME
-        sync: false
-      - key: ONECMS_PASSWORD
-        sync: false
-      - key: ONECMS_STORAGE_STATE_JSON
         sync: false
